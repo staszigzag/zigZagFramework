@@ -1,0 +1,58 @@
+$color-rick: blue;
+$color-morty: green;
+
+.card {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  width          : 200px;
+  margin         : 30px auto;
+  padding        : 5px;
+  border-radius  : 3px;
+  border         : 1px solid $color-rick;
+
+  &__first-name, &__last-name {
+    display     : inline-block;
+    margin      : 0 5px;
+    font-weight : bold;
+  }
+
+  &__age {
+    display     : inline-block;
+    margin-left : 10px;
+  }
+
+  &__title {
+    height : 20px;
+    margin : 6px 0;
+  }
+
+  &__msg {
+    height      : 20px;
+    margin      : 0;
+    font-size   : 13px;
+    font-weight : lighter;
+  }
+
+  &__input-msg {
+    margin : 10px 0;
+  }
+}
+
+.card-new {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  width          : 200px;
+  margin         : 30px auto;
+  padding        : 5px;
+  border-radius  : 3px;
+  border         : 1px solid $color-morty;
+
+  &__first-name, &__last-name {
+    display     : inline-block;
+    margin      : 0 10px;
+    font-weight : bold;
+    font-size   : 20px;
+  }
+}
