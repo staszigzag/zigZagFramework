@@ -1,4 +1,6 @@
 import ZigZag from './ZZFramework/core'
+import Rick from './components/Rick'
+import Morty from './components/Morty'
 
 
 const app = new ZigZag({
@@ -22,7 +24,6 @@ const app = new ZigZag({
     },
     // обычные методы которые можно использовать например в рендер функции
     methods: {
-
         handlerInputMsg(msg){
             this.msg = msg
         },
@@ -32,19 +33,30 @@ const app = new ZigZag({
     },
     // рендер функции, возвращает виртуальную ноду, которай монтируется при создании
     render(h){
-        return h('div', {class: 'card'}, [
-            h('p', {class: 'card__full-name'}, [
-                h('span', {class: 'card__first-name'}, this.firstName),
-                h('span', {class: 'card__last-name'}, this.lastName)
-            ]),
-            h('div', {class: 'card__wrap'}, [
-                h('button', {onclick: () => this.handlerClickIncrement()}, `Прожить год жизни`),
-                h('span', {class: 'card__age'}, this.age)
-            ]),
-            h('input', {class: 'card__input-msg', oninput: (evt) => this.handlerInputMsg(evt.target.value)}, ''),
-            h('p', {class: 'card__title'}, this.msg ? `Ваше сообщение:` : ''),
-            h('p', {class: 'card__msg'}, this.msg)
-        ])
+        return (
+            <Rick
+                firstName={this.firstName}
+                lastName={this.lastName}
+                age={this.age}
+                msg={this.msg}
+                handlerClickIncrement={this.handlerClickIncrement}
+                handlerInputMsg={this.handlerInputMsg}
+            />
+        )
+        // можно использовать нативную рендер функцию вместо jsx
+        // return h('div', {class: 'card'},
+        //     h('p', {class: 'card__full-name'},
+        //         h('span', {class: 'card__first-name'}, this.firstName),
+        //         h('span', {class: 'card__last-name'}, this.lastName)
+        //     ),
+        //     h('div', {class: 'card__wrap'},
+        //         h('button', {onclick: () => this.handlerClickIncrement()}, `Прожить год жизни`),
+        //         h('span', {class: 'card__age'}, this.age)
+        //     ),
+        //     h('input', {class: 'card__input-msg', oninput: (evt) => this.handlerInputMsg(evt.target.value)}, ''),
+        //     h('p', {class: 'card__title'}, this.msg ? `Ваше сообщение:` : ''),
+        //     h('p', {class: 'card__msg'}, this.msg)
+        // )
     }
 })
 
@@ -54,12 +66,12 @@ document.getElementsByClassName('btn-switch')[0].addEventListener('click', () =>
     app.lastName = 'Smith'
     // TODO если нет используемых своиств то сохраняется старая рендер функция
     app.$render(function(h){
-        return h('div', {class: 'card-new'}, [
-            h('p', {class: 'card-new__full-name'}, [
-                h('span', {class: 'card-new__first-name'}, this.firstName),
-                h('span', {class: 'card-new__last-name'}, this.lastName)
-            ])
-        ])
+        return (
+            <Morty
+                firstName={this.firstName}
+                lastName={this.lastName}
+            />
+        )
     })
 })
 

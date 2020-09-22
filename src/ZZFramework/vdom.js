@@ -1,5 +1,8 @@
 // создать виртуальную ноду
-export function createVNode(tag, props, children){
+export function createVNode(tag, props, ...children){
+    // проверка для отдельных компонентов
+    if (typeof tag === 'function') return tag(props, children)
+
     return new vNode(
         tag,
         props,
@@ -7,11 +10,16 @@ export function createVNode(tag, props, children){
     )
 }
 
+function isPrimitive(val){
+    // TODO добавить дополнительные типы примитивов
+    return typeof val === 'string' || typeof val === 'number'
+}
+
 export class vNode {
     constructor(tag, props, children){
         this.tag = tag
-        this.props = props
-        this.children = children
+        this.props = props || {}
+        this.children = children || []
         this.$el = null
     }
 
@@ -28,14 +36,14 @@ export class vNode {
             }
         }
         // если примитив то назначаем его значение, если есть другие ноды то монтируем их
-        // TODO добавить дополнительные типы примитивов
-        if (typeof this.children === 'string' || typeof this.children === 'number'){
-            el.textContent = this.children
-        } else if (Array.isArray(this.children)){
-            this.children.forEach(child => {
+        this.children.forEach(child => {
+            if (isPrimitive(child)){
+                el.textContent = child
+            } else if (child instanceof vNode){
                 child.mount(el)
-            })
-        }
+            }
+        })
+
         container.append(el)
         this.$el = el
     }
@@ -61,7 +69,6 @@ export class vNode {
             newVNode.mount(this.$el.parentNode)
             this.destroy()
         } else {
-
             newVNode.$el = this.$el
             // удаляем все атрибуты а затем назначаем новые
             // TODO нужно оптммизировать это, например проверять на равенство
@@ -78,34 +85,37 @@ export class vNode {
                 }
             }
             // монтируем чилдренов новой ноды
-            if (typeof newVNode.children === 'string' || typeof newVNode.children === 'number'){
-                newVNode.$el.textContent = newVNode.children
-            } else if (Array.isArray(newVNode.children)){
-                // если в старой ноде чилдрен был примитив то сбрасываем его и монтируем новые ноды
-                if (typeof this.children === 'string' || typeof this.children === 'number'){
+            const commonLength = Math.min(this.children.length, newVNode.children.length)
+            // меняем общие ноды
+            for(let i = 0; i < commonLength; i++) {
+                // примитивы
+                if (isPrimitive(newVNode.children[i]) && isPrimitive(this.children[i])){
+                    // TODO проверка на равенство
+                    newVNode.$el.textContent = newVNode.children[i]
+                    // если в старой ноде чилдрен был примитив то сбрасываем его и монтируем новые ноды
+                } else if (!isPrimitive(newVNode.children[i]) && isPrimitive(this.children[i])){
                     newVNode.$el.textContent = null
-                    newVNode.children.forEach(child => {
-                        child.mount(newVNode.$el)
-                    })
-                    // а это если были дочернии ноды
-                } else if (Array.isArray(this.children)){
-                    const commonLength = Math.min(this.children.length, newVNode.children.length)
-                    // меняем общие ноды
-                    for(let i = 0; i < commonLength; i++) {
-                        this.children[i].patch(newVNode.children[i])
-                    }
-                    // у старой ноды было больше дочених нод чем у новой, удаляем их
-                    if (this.children.length > newVNode.children.length){
-                        this.children.slice(newVNode.children.length).forEach(child => {
-                            child.destroy()
-                        })
-                        // у новой ноды больше дочених нод чем у старой, монтируем новые
-                    } else if (newVNode.children.length > this.children.length){
-                        newVNode.children.slice(this.children.length).forEach(child => {
-                            child.mount(this.$el)
-                        })
-                    }
+                    newVNode.children[i].mount(newVNode.$el)
+                    // если в новой ноде чилдрен примитив а в старой чилдрее состовной
+                } else if (isPrimitive(newVNode.children[i]) && !isPrimitive(this.children[i])){
+                    this.children[i].destroy()
+                    newVNode.$el.textContent = newVNode.children[i]
+                    // дочернии ноды
+                } else if (!isPrimitive(newVNode.children[i]) && !isPrimitive(this.children[i])){
+                    this.children[i].patch(newVNode.children[i])
                 }
+            }
+
+            // у старой ноды было больше дочених нод чем у новой, удаляем их
+            if (this.children.length > newVNode.children.length){
+                this.children.slice(newVNode.children.length).forEach(child => {
+                    child.destroy()
+                })
+                // у новой ноды больше дочених нод чем у старой, монтируем новые
+            } else if (newVNode.children.length > this.children.length){
+                newVNode.children.slice(this.children.length).forEach(child => {
+                    child.mount(this.$el)
+                })
             }
         }
     }
